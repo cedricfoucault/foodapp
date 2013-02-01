@@ -1,0 +1,31 @@
+<h1>Listing foods</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Energy</th>
+    <th>Proteins</th>
+    <th>Carbs</th>
+    <th>Fat</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @foods.each do |food| %>
+  <tr>
+    <td><%= food.name %></td>
+    <td><%= food.energy %></td>
+    <td><%= food.proteins %></td>
+    <td><%= food.carbohydrate %></td>
+    <td><%= food.fat %></td>
+    <td><%= link_to 'Show', food %></td>
+    <td><%= link_to 'Edit', edit_food_path(food) %></td>
+    <td><%= link_to 'Destroy', food, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Food', new_food_path %>

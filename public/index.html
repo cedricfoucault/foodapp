@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ruby on Rails: Welcome aboard</title>
+
+  <link rel="stylesheet" href="/assets/application.css">
+  <script src="/assets/application.js"></script>
+</head>
+<body ng-app>
+
+  <div ng-controller="FoodCtrl">
+    <!-- résumé nutrition -->
+    <div class="FoodSummary">
+      <h1>Foodapp</h1>
+
+      <table cellspacing="0" cellpadding="5">
+        <tr>
+          <th>Proteins</th>
+          <td>{{proteins()}}</td>
+        </tr>
+
+        <tr>
+          <th>Carbs</th>
+          <td>{{carbs()}}</td>
+        </tr>
+
+        <tr>
+          <th>Lipids</th>
+          <td>{{fat()}}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- liste d'aliments -->
+    <ul class="FoodList">
+      <li ng-repeat="food in foods">
+        <span class="dynamicsparkline">
+          {{food.proteins}},
+          {{food.carbs}},
+          {{food.fat}}
+        </span>
+        {{food.text}}
+        <button ng-click="removeFood(food)">&times;</button>
+      </li>
+    </ul>
+
+    <!-- champ de recherche -->
+    <form class="Search" ng-submit="addFood()">
+      <table border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td><input type="text" ng-model="foodText" placeholder="enter food name"></td>
+          <td><input type="submit" value="add"></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+</body>
+</html>
