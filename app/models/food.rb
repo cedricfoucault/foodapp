@@ -22,7 +22,8 @@ class Food < ActiveRecord::Base
     find(:all,
       conditions: ['common_name LIKE ? OR scientific_name LIKE ?'\
         ' OR long_description LIKE ? OR short_description LIKE ?',
-        pattern, pattern, pattern, pattern])
+        pattern, pattern, pattern, pattern],
+      order: "length(long_description)")
   end
   
 
