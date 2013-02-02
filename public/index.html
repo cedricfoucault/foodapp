@@ -6,9 +6,15 @@
   <link rel="stylesheet" href="/assets/application.css">
   <script src="/assets/application.js"></script>
 </head>
-<body ng-app>
+<body ng-app="FoodApp">
 
   <div ng-controller="FoodCtrl">
+    <div class="completion hidden">
+      <div ng-repeat="result in results">
+        <a>{{result.text}}</a>
+      </div>
+    </div>
+
     <!-- résumé nutrition -->
     <div class="FoodSummary">
       <h1>Foodapp</h1>
@@ -45,11 +51,11 @@
     </ul>
 
     <!-- champ de recherche -->
-    <form class="Search" ng-submit="addFood()">
+    <form class="Search" ng-submit="searchFood()">
       <table border="0" cellspacing="0" cellpadding="0">
         <tr>
-          <td><input type="text" ng-model="foodText" placeholder="enter food name"></td>
-          <td><input type="submit" value="add"></td>
+          <td><input type="text" ng-model="foodText" on-keyup="searchFood()" placeholder="enter food name"></td>
+          <!-- <td><input type="submit" value="add"></td> -->
         </tr>
       </table>
     </form>

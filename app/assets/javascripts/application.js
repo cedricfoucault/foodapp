@@ -13,91 +13,124 @@
 //= require jquery
 //= require_tree .
 
+angular.module('FoodApp', []).
+directive('onKeyup', function() {
+    return function(scope, elm, attrs) {
+        elm.bind("keyup", function() {
+            scope.$apply(attrs.onKeyup);
+        });
+    };
+});
+
 // Voir http://angularjs.org/ pour la fonction suivante.
 function FoodCtrl($scope) {
-  // Liste des aliments ajoutés (et leurs valeurs nutritionelles)
-  $scope.foods = [
+    $scope.results = [];
+
+    // Liste des aliments ajoutés (et leurs valeurs nutritionelles)
+    $scope.foods = [
     {
-      text: "Banana",
-      proteins: 10,
-      carbs: 50,
-      fat: 20
+        text: "Banana",
+        proteins: 10,
+        carbs: 50,
+        fat: 20
     },
     {
-      text: "Chicken",
-      proteins: 80,
-      carbs: 0,
-      fat: 20
+        text: "Chicken",
+        proteins: 80,
+        carbs: 0,
+        fat: 20
     }
-  ];
+    ];
 
-  // bilan des protéines
-  $scope.proteins = function() {
-    var r = 0;
-    for (var i = $scope.foods.length - 1; i >= 0; i--){
-      r = r + $scope.foods[i].proteins;
+    // bilan des protéines
+    $scope.proteins = function() {
+        var r = 0;
+        for (var i = $scope.foods.length - 1; i >= 0; i--){
+            r = r + $scope.foods[i].proteins;
+        };
+        return r;
     };
-    return r;
-  };
 
-  // bilan des glucides
-  $scope.carbs = function() {
-    var r = 0;
-    for (var i = $scope.foods.length - 1; i >= 0; i--){
-      r = r + $scope.foods[i].carbs;
+    // bilan des glucides
+    $scope.carbs = function() {
+        var r = 0;
+        for (var i = $scope.foods.length - 1; i >= 0; i--){
+            r = r + $scope.foods[i].carbs;
+        };
+        return r;
     };
-    return r;
-  };
 
-  // bilan des lipides
-  $scope.fat = function() {
-    var r = 0;
-    for (var i = $scope.foods.length - 1; i >= 0; i--){
-      r = r + $scope.foods[i].fat;
+    // bilan des lipides
+    $scope.fat = function() {
+        var r = 0;
+        for (var i = $scope.foods.length - 1; i >= 0; i--){
+            r = r + $scope.foods[i].fat;
+        };
+        return r;
     };
-    return r;
-  };
 
-  // cette fonction est executée quand la fonction de recherche est
-  // validée.
-  $scope.addFood = function() {
-    $.ajax("/foods/" + $scope.foodText + ".xml", {
-      success: function (r) {
-        r = $(r);
-        // TODO: traiter la réponse (<food>...</food>)
+    $scope.searchFood = function() {
+        if ($scope.foodText.length > 2) {
+            $.ajax("/foods.xml?name=" + $scope.foodText, {
+                success: function (r) {
+                    $scope.results = [];
 
-        // ajouter les donnéees extraites à la liste d'aliments:
-        $scope.foods.push({
-          text:     r.find("common_name").text(),
-          proteins: 0, // 0 étant une valeur bateau pour le moment
-          carbs:    0,
-          fat:      0
+                    r = $(r);
+                    results = r.find("food");
+
+                    results.each(function(i) {
+                        console.log(results[i]);
+                        $scope.results.push({
+                            text:     $(results[i]).find("common_name").text(),
+                            proteins: 0, // 0 étant une valeur bateau pour le moment
+                            carbs:    0,
+                            fat:      0
+                        });
+                    });
+
+                    $('.completion').removeClass("hidden");
+                    $scope.$apply();
+                }
+            });
+        } else {
+            $('.completion').addClass("hidden");
+        };
+    };
+
+    // cette fonction est executée quand la fonction de recherche est
+    // validée.
+    $scope.addFood = function() {
+        $.ajax("/foods/" + $scope.foodText + ".xml", {
+            success: function (r) {
+                r = $(r);
+                // TODO: traiter la réponse (<food>...</food>)
+
+                // ajouter les donnéees extraites à la liste d'aliments:
+                $scope.foods.push({
+                    text:     r.find("common_name").text(),
+                    proteins: 0, // 0 étant une valeur bateau pour le moment
+                    carbs:    0,
+                    fat:      0
+                });
+                $scope.$apply();
+                // $('.dynamicsparkline').sparkline("html", {
+                //   type: "pie"
+                // });
+            }
         });
-        $scope.$apply();
-        // $('.dynamicsparkline').sparkline("html", {
-        //   type: "pie"
-        // });
-      }
-    });
 
-    // $scope.foods.push({
-    //   text: $scope.foodText,
-    //   proteins: 40,
-    //   carbs: 50,
-    //   fat: 50
-    // });
-    $scope.foodText = '';
-  };
-
-  // retirer un aliment de la liste
-  $scope.removeFood = function(food) {
-    for (var i = $scope.foods.length - 1; i >= 0; i--){
-      if(food == $scope.foods[i]) {
-        $scope.foods.splice(i, 1);
-      }
+        $scope.foodText = '';
     };
-  };
-}
+
+    // retirer un aliment de la liste
+    $scope.removeFood = function(food) {
+        for (var i = $scope.foods.length - 1; i >= 0; i--){
+            if(food == $scope.foods[i]) {
+                $scope.foods.splice(i, 1);
+            }
+        };
+    };
+};
 
 // la page est divisee en 3 sections (resume des nutriments, liste
 // d'aliments, champ de recherche).
@@ -105,18 +138,20 @@ function FoodCtrl($scope) {
 // le resume et le champ de recherche. Cette fonction ajuste la hauteur
 // de la section "liste".
 function layout () {
-  $(".FoodList").css({height: $(window).height()
-                              - $(".FoodSummary").innerHeight()
-                              - $(".Search").innerHeight()});
+    $(".FoodList").css({
+        height: $(window).height()
+                - $(".FoodSummary").innerHeight()
+                - $(".Search").innerHeight()
+    });
 }
 
 // lorsque la page est chargée, ajuster la hauteur de la liste d'aliments,
 // et redimensionner cette liste quand la taille de la fenetre change.
 $(function () {
-  layout();
-  $(window).bind('resize', layout);
-  var myvalues = [10,5,2];
-  // $('.dynamicsparkline').sparkline("html", {
-  //   type: "pie"
-  // });
+    layout();
+    $(window).bind('resize', layout);
+    var myvalues = [10,5,2];
+    // $('.dynamicsparkline').sparkline("html", {
+    //   type: "pie"
+    // });
 });

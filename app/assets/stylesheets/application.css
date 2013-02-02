@@ -1,81 +1,97 @@
 /*
- * This is a manifest file that'll be compiled into application.css, which will include all the files
- * listed below.
- *
- * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
- * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
- *
- * You're free to add application-wide styles to this file and they'll appear at the top of the
- * compiled file, but it's generally better to create a new file per style scope.
- *
- *= require_self
- *= require_tree .
- */
+* This is a manifest file that'll be compiled into application.css, which will include all the files
+* listed below.
+*
+* Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+* or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+*
+* You're free to add application-wide styles to this file and they'll appear at the top of the
+* compiled file, but it's generally better to create a new file per style scope.
+*
+*= require_self
+*= require_tree .
+*/
 
 html, body {
-font-family: "Helvetica Neue", helvetica, arial, sans-serif;
-height: 100%;
-overflow: hidden;
+    font-family: "Helvetica Neue", helvetica, arial, sans-serif;
+    height: 100%;
+    overflow: hidden;
 }
 
 body {
-font-size: 16px;
-height: 100%;
-margin: 0;
+    font-size: 16px;
+    height: 100%;
+    margin: 0;
 }
 
 input, select {
-border: 1px solid #777;
-border-radius: 6px;
-font-size: 2em;
+    border: 1px solid #777;
+    border-radius: 6px;
+    font-size: 2em;
 }
 
 h1 {
-margin: 0;
-padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .FoodSummary table {
-text-align: left;
-border-bottom: 1px solid #999;
-border-right: 1px solid #999;
+    text-align: left;
+    border-bottom: 1px solid #999;
+    border-right: 1px solid #999;
 }
 .FoodSummary td, .FoodSummary th {
-border-left: 1px solid #999;
-border-top: 1px solid #999;
+    border-left: 1px solid #999;
+    border-top: 1px solid #999;
 }
 
 .Search {
-background-color: #ddd;
+    background-color: #ddd;
 }
 
 .FoodSummary {
-/*    border-bottom: 1px solid #ddd;*/
-box-shadow: 0px 0px 1em rgba(0,0,0,0.3);
-padding: 1em;
+    box-shadow: 0px 0px 1em rgba(0,0,0,0.3);
+    padding: 1em;
 }
 
 .FoodList {
-overflow-y: scroll;
-margin: 0;
-padding: 0;
+    overflow-y: scroll;
+    margin: 0;
+    padding: 0;
 }
 .FoodList>li {
-border-bottom: 1px solid #ddd;
-padding: .5em .5em;
-position: relative;
+    border-bottom: 1px solid #ddd;
+    padding: .5em .5em;
+    position: relative;
 }
 .FoodList>li:hover {
-background-color: #eee;
-border-bottom: 1px solid #ccc;
+    background-color: #eee;
+    border-bottom: 1px solid #ccc;
 }
 .FoodList>li>button {
-background-color: #e55;
-padding: .4em .6em;
-color: #fff;
-border: none;
-border-radius: 100px;
-position: absolute;
-right: .5em;
-top: .5em;
+    background-color: #e55;
+    padding: .4em .6em;
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    position: absolute;
+    right: .5em;
+    top: .5em;
+}
+
+.completion {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #ccc;
+    box-shadow: 0px .3em 1em rgba(0,0,0,0.3);
+    border-radius: .3em;
+    bottom: 3.5em;
+    padding: .5em;
+    left: 1em;
+    right: 1em;
+    max-height: 35%;
+    position: absolute;
+}
+
+.hidden {
+    display: none;
 }
