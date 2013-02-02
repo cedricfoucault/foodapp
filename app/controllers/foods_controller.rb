@@ -9,6 +9,7 @@ class FoodsController < ApplicationController
 
     respond_to do |format|
       format.xml { @food }
+      format.html
     end
   end
   
