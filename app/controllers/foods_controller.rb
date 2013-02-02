@@ -1,6 +1,6 @@
 # -*- encoding : utf-8 -*-
 class FoodsController < ApplicationController
-  before_filter :auth, except: [:show]
+  before_filter :auth, except: [:show, :index]
 
   # GET /foods/1
   # GET /foods/1.json
@@ -21,15 +21,16 @@ class FoodsController < ApplicationController
   #       format.xml { @food }
   #     end
   #   end
-  # def index
-  #     # retrieve the search results
-  #     @foods = Food.search(params[:name])
-  #     
-  #     respond_to do |format|
-  #       format.xml { @foods }
-  #     end
-  #     
-  #   end
+  def index
+      # retrieve the search results
+      @foods = Food.search(params[:name])
+      
+      respond_to do |format|
+        format.xml { @foods }
+        format.html
+      end
+      
+  end
 
   # POST /foods
   # POST /foods.json

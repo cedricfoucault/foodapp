@@ -18,7 +18,7 @@ class Food < ActiveRecord::Base
   end
   
   def self.search(name)
-    pattern = "%" + name + "%"
+    pattern = name + "%" # entry must begin with the given string
     find(:all,
       conditions: ['common_name LIKE ? OR scientific_name LIKE ?'\
         ' OR long_description LIKE ? OR short_description LIKE ?',

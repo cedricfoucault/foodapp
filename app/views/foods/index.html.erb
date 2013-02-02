@@ -14,9 +14,9 @@
 
 <% @foods.each do |food| %>
   <tr>
-    <td><%= food.name %></td>
+    <td><%= food.long_description %></td>
     <td><%= food.energy %></td>
-    <td><%= food.proteins %></td>
+    <td><%= food.protein %></td>
     <td><%= food.carbohydrate %></td>
     <td><%= food.fat %></td>
     <td><%= link_to 'Show', food %></td>
