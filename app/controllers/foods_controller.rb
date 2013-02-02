@@ -9,6 +9,14 @@ class FoodsController < ApplicationController
       format.xml { @food }
     end
   end
+  
+  def search name
+    # retrieve the first result
+    @food = Food.search(name)[0]
+    
+    respond_to do |format|
+      format.xml { @food }
+  end
 
   # POST /foods
   # POST /foods.json

@@ -17,6 +17,14 @@ class Food < ActiveRecord::Base
     end
   end
   
+  def self.search(name)
+    pattern = "%" + name + "%"
+    find(:all,
+      conditions: ['common_name LIKE ? OR scientific_name LIKE ?'\
+        ' OR long_description LIKE ? OR short_description LIKE ?',
+        pattern, pattern, pattern, pattern])
+  end
+  
 
   def self.xmlfood_to_hash xmlstring
     begin
