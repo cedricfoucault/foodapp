@@ -36,14 +36,20 @@ class Food < ActiveRecord::Base
         end
         # retrieve the value to put in the database for this field
         val = is_numeric?(field) ? elem.text.to_f : elem.text
+        # convert the value in the unit of measure used in the database
         if elem.has_attribute? 'unit'
-          # puts elem['unit']
-          # puts field
-          # convert the value in the unit of measure used in the database
           if field == :energy
-            val *= in_kcal(elem['unit'])
+            if is_energy_unit? elem['unit']
+              val *= in_kcal(elem['unit'])
+            else
+              raise ArgumentError.new("Unknown unit of energy #{elem['unit']} for #{field}")
+            end
           else
-            val *= in_g(elem['unit']) / in_g(UNIT_FOR[field])
+            if is_mass_unit? elem['unit']
+              val *= in_g(elem['unit']) / in_g(UNIT_FOR[field])
+            else
+              raise ArgumentError.new("Unknown unit of mass #{elem['unit']} for #{field}")
+            end
           end
         end
         # add it in the hash
@@ -73,6 +79,17 @@ class Food < ActiveRecord::Base
     ].include? field
   end
   
+  def self.is_mass_unit? unit
+    [
+      "g",
+      "mg",
+      "µg",
+      "lb",
+      "oz",
+      "dr"
+    ].include? unit
+  end
+  
   def self.in_g unit
     {
       "g" => 1,
@@ -82,6 +99,13 @@ class Food < ActiveRecord::Base
       "oz" => 28.349523,
       "dr" => 1.771845
     }[unit]
+  end
+  
+  def self.is_energy_unit? unit
+    [
+      "kcal",
+      "kJ",
+    ].include? unit
   end
   
   def self.in_kcal unit
