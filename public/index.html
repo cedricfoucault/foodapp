@@ -9,9 +9,10 @@
 <body ng-app="FoodApp">
 
   <div ng-controller="FoodCtrl">
+    <!-- résultats de recherche, pas toujours affichés -->
     <div class="completion hidden">
       <div ng-repeat="result in results">
-        <a>{{result.text}}</a>
+        <span ng-click="selectFood(result)">{{result.text}}</span>
       </div>
     </div>
 
@@ -52,10 +53,26 @@
 
     <!-- champ de recherche -->
     <form class="Search" ng-submit="searchFood()">
-      <table border="0" cellspacing="0" cellpadding="0">
+      <table border="0" cellspacing="0" cellpadding="0" id="searchBox">
         <tr>
           <td><input type="text" ng-model="foodText" on-keyup="searchFood()" placeholder="enter food name"></td>
           <!-- <td><input type="submit" value="add"></td> -->
+        </tr>
+      </table>
+
+      <table border="0" cellspacing="0" cellpadding="0" id="confirmBox" class="hidden">
+        <tr>
+          <td>{{currentFood.text}}</td>
+          <td>
+            <select name="some_name" id="some_name" onchange="" size="1">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              
+            </select>
+          </td>
+
+          <td><button ng-click="addFood()">Add</button></td>
+          <td><button ng-click="cancel()">&times;</button></td>
         </tr>
       </table>
     </form>

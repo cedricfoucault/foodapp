@@ -24,8 +24,6 @@ directive('onKeyup', function() {
 
 // Voir http://angularjs.org/ pour la fonction suivante.
 function FoodCtrl($scope) {
-    $scope.results = [];
-
     // Liste des aliments ajoutés (et leurs valeurs nutritionelles)
     $scope.foods = [
     {
@@ -75,11 +73,9 @@ function FoodCtrl($scope) {
                 success: function (r) {
                     $scope.results = [];
 
-                    r = $(r);
-                    results = r.find("food");
+                    results = $(r).find("food");
 
                     results.each(function(i) {
-                        console.log(results[i]);
                         $scope.results.push({
                             text:     $(results[i]).find("common_name").text(),
                             proteins: 0, // 0 étant une valeur bateau pour le moment
@@ -97,30 +93,46 @@ function FoodCtrl($scope) {
         };
     };
 
+    $scope.selectFood = function (e) {
+        $scope.currentFood = e;
+        $('.completion').addClass("hidden");
+        $('#searchBox').addClass("hidden");
+        $('#confirmBox').removeClass("hidden");
+        $scope.foodText = '';
+    }
+
     // cette fonction est executée quand la fonction de recherche est
     // validée.
     $scope.addFood = function() {
-        $.ajax("/foods/" + $scope.foodText + ".xml", {
-            success: function (r) {
-                r = $(r);
-                // TODO: traiter la réponse (<food>...</food>)
+        // $.ajax("/foods/" + $scope.foodText + ".xml", {
+        //     success: function (r) {
+        //         r = $(r);
+        //         // TODO: traiter la réponse (<food>...</food>)
+        // 
+        //         // ajouter les donnéees extraites à la liste d'aliments:
+        //         $scope.foods.push({
+        //             text:     r.find("common_name").text(),
+        //             proteins: 0, // 0 étant une valeur bateau pour le moment
+        //             carbs:    0,
+        //             fat:      0
+        //         });
+        //         $scope.$apply();
+        //         // $('.dynamicsparkline').sparkline("html", {
+        //         //   type: "pie"
+        //         // });
+        //     }
+        // });
 
-                // ajouter les donnéees extraites à la liste d'aliments:
-                $scope.foods.push({
-                    text:     r.find("common_name").text(),
-                    proteins: 0, // 0 étant une valeur bateau pour le moment
-                    carbs:    0,
-                    fat:      0
-                });
-                $scope.$apply();
-                // $('.dynamicsparkline').sparkline("html", {
-                //   type: "pie"
-                // });
-            }
-        });
-
+        $scope.foods.push($scope.currentFood);
+        $('#searchBox').removeClass("hidden");
+        $('#confirmBox').addClass("hidden");
         $scope.foodText = '';
     };
+
+    $scope.cancel = function () {
+        $('#searchBox').removeClass("hidden");
+        $('#confirmBox').addClass("hidden");
+    }
 
     // retirer un aliment de la liste
     $scope.removeFood = function(food) {
