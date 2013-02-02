@@ -34,11 +34,11 @@
     <!-- liste d'aliments -->
     <ul class="FoodList">
       <li ng-repeat="food in foods">
-        <span class="dynamicsparkline">
+        <!-- <span class="dynamicsparkline">
           {{food.proteins}},
           {{food.carbs}},
           {{food.fat}}
-        </span>
+        </span> -->
         {{food.text}}
         <button ng-click="removeFood(food)">&times;</button>
       </li>
