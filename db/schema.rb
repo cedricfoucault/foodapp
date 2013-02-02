@@ -1,4 +1,4 @@
-# -*- encoding : utf-8 -*-
+# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -17,11 +17,15 @@ ActiveRecord::Schema.define(:version => 20130130154717) do
     t.string   "common_name"
     t.string   "manufacturer_name"
     t.string   "scientific_name"
+    t.string   "category"
     t.string   "short_description"
+    t.string   "long_description"
     t.string   "refuse_description"
-    t.string   "source"
+    t.float    "refuse_percentage"
+    t.float    "density"
     t.float    "energy"
-    t.float    "proteins"
+    t.float    "water"
+    t.float    "protein"
     t.float    "carbohydrate"
     t.float    "fat"
     t.float    "fibers"
@@ -31,6 +35,7 @@ ActiveRecord::Schema.define(:version => 20130130154717) do
     t.float    "saturated_fat"
     t.float    "monounsaturated_fat"
     t.float    "polyunsaturated_fat"
+    t.float    "trans_fat"
     t.float    "cholesterol"
     t.float    "omega_3"
     t.float    "epa"
@@ -64,9 +69,9 @@ ActiveRecord::Schema.define(:version => 20130130154717) do
     t.float    "vit_k"
     t.float    "alpha_carotene"
     t.float    "beta_carotene"
+    t.string   "source"
     t.datetime "created_at",          :null => false
     t.datetime "updated_at",          :null => false
   end
 
 end
-
