@@ -16,6 +16,7 @@ class FoodsController < ApplicationController
     
     respond_to do |format|
       format.xml { @food }
+    end
   end
 
   # POST /foods
