@@ -63,15 +63,20 @@ function FoodCtrl($scope) {
   $scope.addFood = function() {
     $.ajax("/foods/" + $scope.foodText + ".xml", {
       success: function (r) {
+        r = $(r);
         // TODO: traiter la réponse (<food>...</food>)
 
         // ajouter les donnéees extraites à la liste d'aliments:
         $scope.foods.push({
-          text:     $scope.foodText,
+          text:     r.find("common_name").text(),
           proteins: 0, // 0 étant une valeur bateau pour le moment
           carbs:    0,
           fat:      0
         });
+        $scope.$apply();
+        // $('.dynamicsparkline').sparkline("html", {
+        //   type: "pie"
+        // });
       }
     });
 
@@ -111,7 +116,7 @@ $(function () {
   layout();
   $(window).bind('resize', layout);
   var myvalues = [10,5,2];
-  $('.dynamicsparkline').sparkline("html", {
-    type: "pie"
-  });
+  // $('.dynamicsparkline').sparkline("html", {
+  //   type: "pie"
+  // });
 });
