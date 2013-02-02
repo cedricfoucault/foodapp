@@ -10,14 +10,22 @@ class FoodsController < ApplicationController
     end
   end
 
-  # GET /foods/1
-  # GET /foods/1.json
-  def show
-    @food = Food.find(params[:id])
-
-    respond_to do |format|
-      format.xml { @food }
-    end
+  # def search name
+  #     # retrieve the first result
+  #     @food = Food.search(name)[0]
+  #     
+  #     respond_to do |format|
+  #       format.xml { @food }
+  #     end
+  #   end
+  def index
+      # retrieve the search results
+      @foods = Food.search(params[:name])
+      
+      respond_to do |format|
+        format.xml { @foods }
+        format.html
+      end
   end
 
   # POST /foods

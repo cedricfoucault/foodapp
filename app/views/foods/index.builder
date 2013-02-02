@@ -1,6 +1,5 @@
 xml.foods do
-  @foods.each do |f|
-    xml.food do
-    end
+  @foods.each do |food|
+    xml << render(partial: 'food', locals: {food: food})
   end
 end
