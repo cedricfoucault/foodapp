@@ -53,14 +53,15 @@ class FoodsController < ApplicationController
             format.xml { head :conflict }
             # else send a 422 Unprocessable entity error
           else
-            format.xml { render xml: @food.errors, status: :unprocessable_entity }
+            format.xml { render text: @food.errors.map { |_, e| "#{e}" }.join("\n")+"\n",
+                                status: :unprocessable_entity }
           end
         end
       end
     rescue ArgumentError => e
       # bad request: improper XML food
       respond_to do |format|
-        format.xml { render text: e, status: :unprocessable_entity}
+        format.xml { render text: "#{e}\n", status: :unprocessable_entity}
       end
     end
   end
