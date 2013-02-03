@@ -20,7 +20,7 @@ class FoodsController < ApplicationController
   #   end
   def index
       # retrieve the search results
-      @foods = Food.search(params[:name])
+      @foods = params[:name] ? Food.search(params[:name]) : Food.find(:all, limit: 50)
       
       respond_to do |format|
         format.xml { @foods }
