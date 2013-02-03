@@ -2,17 +2,14 @@
 class FoodsController < ApplicationController
   before_filter :auth, except: [:show, :index]
 
-  # GET /foods/1
-  # GET /foods/1.json
-  def show
-    @food = Food.find(params[:id])
+  def index
+    @foods = Food.search(params[:name])
 
     respond_to do |format|
-      format.xml { @food }
-      format.html
+      format.xml { @foods }
     end
   end
-  
+
   # def search name
   #     # retrieve the first result
   #     @food = Food.search(name)[0]
@@ -29,7 +26,6 @@ class FoodsController < ApplicationController
         format.xml { @foods }
         format.html
       end
-      
   end
 
   # POST /foods

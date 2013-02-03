@@ -5,15 +5,60 @@
 
   <link rel="stylesheet" href="/assets/application.css">
   <script src="/assets/application.js"></script>
+  <script src="/js/highcharts.js" type="text/javascript"></script>
+
+  <script type="text/javascript" charset="utf-8">
+  window.overview = {};
+
+  function chartData () {
+    // window.overview.series[0].data[0].update(4);
+    // window.overview.series[0].data[1].update(4);
+    // window.overview.series[0].data[2].update(4);
+  }
+
+  $(function () {
+    window.overview = new Highcharts.Chart({
+      chart: {
+        renderTo: 'pie',
+        type: 'pie',
+        // events: {
+        //   load: chartData
+        // }
+      },
+      title: {
+        text: 'FoodApp'
+      },
+      // xAxis: {
+      //   categories: ['Proteins', 'Carbs', 'Fat']
+      // },
+      series: [{
+        name: 'Random data',
+        data: [
+          ["Proteins", 0],
+          ["Carbs", 0],
+          ["Fat", 0]
+        ]
+      }]
+    });
+    // chartData();
+  });
+  </script>
 </head>
-<body ng-app>
+<body ng-app="FoodApp">
 
   <div ng-controller="FoodCtrl">
+    <!-- résultats de recherche, pas toujours affichés -->
+    <div class="completion hidden">
+      <div ng-repeat="result in results">
+        <span ng-click="selectFood(result)">{{result.text}}</span>
+      </div>
+    </div>
+
     <!-- résumé nutrition -->
     <div class="FoodSummary">
-      <h1>Foodapp</h1>
+      <div id="pie" style="width: 300px; height: 200px"></div>
 
-      <table cellspacing="0" cellpadding="5">
+      <!-- <table cellspacing="0" cellpadding="5">
         <tr>
           <th>Proteins</th>
           <td>{{proteins()}}</td>
@@ -28,7 +73,7 @@
           <th>Lipids</th>
           <td>{{fat()}}</td>
         </tr>
-      </table>
+      </table> -->
     </div>
 
     <!-- liste d'aliments -->
@@ -39,21 +84,57 @@
           {{food.carbs}},
           {{food.fat}}
         </span> -->
-        {{food.text}}
+        {{food.quantity}}g
+        <span ng-click="showDetail()">{{food.text}}</span>
         <button ng-click="removeFood(food)">&times;</button>
       </li>
     </ul>
 
     <!-- champ de recherche -->
-    <form class="Search" ng-submit="addFood()">
-      <table border="0" cellspacing="0" cellpadding="0">
+    <form class="Search" ng-submit="searchFood()">
+      <table border="0" cellspacing="0" cellpadding="0" id="searchBox">
         <tr>
-          <td><input type="text" ng-model="foodText" placeholder="enter food name"></td>
-          <td><input type="submit" value="add"></td>
+          <td><input type="text" ng-model="foodText" on-keyup="searchFood()" placeholder="enter food name"></td>
+          <!-- <td><input type="submit" value="add"></td> -->
+        </tr>
+      </table>
+
+      <table border="0" cellspacing="0" cellpadding="0" id="confirmBox" class="hidden">
+        <tr>
+          <td>{{currentFood.text}}</td>
+          <td>
+            <!-- <select name="some_name" id="some_name" onchange="" size="1">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              
+            </select> -->
+            <input type="text" ng-model="quantity" size="3">g
+          </td>
+
+          <td><button ng-click="addFood()">Add</button></td>
+          <td><button ng-click="cancel()">&times;</button></td>
         </tr>
       </table>
     </form>
-  </div>
 
+    <div class="detail hidden">
+      <span ng-click="hideDetail()">CLOSE</span>
+      <h1>{{currentFood.text}}</h1>
+      <table border="1" cellspacing="0" cellpadding="0">
+        <tr>
+          <td>Proteins</td>
+          <td>{{currentFood.proteins}}</td>
+        </tr>
+        <tr>
+          <td>Carbs</td>
+          <td>{{currentFood.carbs}}</td>
+        </tr>
+        <tr>
+          <td>Fat</td>
+          <td>{{currentFood.fat}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
 </body>
 </html>
