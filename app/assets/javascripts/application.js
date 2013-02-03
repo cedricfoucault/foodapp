@@ -25,26 +25,14 @@ directive('onKeyup', function() {
 // Voir http://angularjs.org/ pour la fonction suivante.
 function FoodCtrl($scope) {
     // Liste des aliments ajoutés (et leurs valeurs nutritionelles)
-    $scope.foods = [
-    {
-        text: "Banana",
-        proteins: 10,
-        carbs: 50,
-        fat: 20
-    },
-    {
-        text: "Chicken",
-        proteins: 80,
-        carbs: 0,
-        fat: 20
-    }
-    ];
+    $scope.foods = [];
+    $scope.currentFood = {};
 
     // bilan des protéines
     $scope.proteins = function() {
         var r = 0;
         for (var i = $scope.foods.length - 1; i >= 0; i--){
-            r = r + $scope.foods[i].proteins;
+            r = r + ($scope.foods[i].proteins * $scope.foods[i].quantity / 100.0);
         };
         return r;
     };
@@ -53,7 +41,7 @@ function FoodCtrl($scope) {
     $scope.carbs = function() {
         var r = 0;
         for (var i = $scope.foods.length - 1; i >= 0; i--){
-            r = r + $scope.foods[i].carbs;
+            r = r + ($scope.foods[i].carbs * $scope.foods[i].quantity / 100.0);
         };
         return r;
     };
@@ -62,25 +50,34 @@ function FoodCtrl($scope) {
     $scope.fat = function() {
         var r = 0;
         for (var i = $scope.foods.length - 1; i >= 0; i--){
-            r = r + $scope.foods[i].fat;
+            r = r + ($scope.foods[i].fat * $scope.foods[i].quantity / 100.0);
         };
         return r;
+    };
+
+    $scope.showDetail = function() {
+        $(".detail").removeClass("hidden");
+    };
+
+    $scope.hideDetail = function() {
+        $(".detail").addClass("hidden");
     };
 
     $scope.searchFood = function() {
         if ($scope.foodText.length > 2) {
             $.ajax("/foods.xml?name=" + $scope.foodText, {
                 success: function (r) {
+                    // console.log(r);
                     $scope.results = [];
 
                     results = $(r).find("food");
 
                     results.each(function(i) {
                         $scope.results.push({
-                            text:     $(results[i]).find("common_name").text(),
-                            proteins: 0, // 0 étant une valeur bateau pour le moment
-                            carbs:    0,
-                            fat:      0
+                            text:     $(results[i]).find("long_description").text(),
+                            proteins: parseFloat($(results[i]).find("protein").text()),
+                            carbs:    parseFloat($(results[i]).find("carbohydrate").text()),
+                            fat:      parseFloat($(results[i]).find("fat").text())
                         });
                     });
 
@@ -123,10 +120,15 @@ function FoodCtrl($scope) {
         //     }
         // });
 
+        $scope.currentFood.quantity = parseFloat($scope.quantity);
         $scope.foods.push($scope.currentFood);
         $('#searchBox').removeClass("hidden");
         $('#confirmBox').addClass("hidden");
         $scope.foodText = '';
+        $scope.quantity = '';
+        window.overview.series[0].data[0].update($scope.proteins());
+        window.overview.series[0].data[1].update($scope.carbs());
+        window.overview.series[0].data[2].update($scope.fat());
     };
 
     $scope.cancel = function () {
