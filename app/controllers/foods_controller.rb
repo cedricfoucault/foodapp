@@ -2,11 +2,12 @@
 class FoodsController < ApplicationController
   before_filter :auth, except: [:show, :index]
 
-  def index
-    @foods = Food.search(params[:name])
+  def show
+    @food = Food.find(params[:id])
 
     respond_to do |format|
-      format.xml { @foods }
+      format.xml { @food }
+      format.html
     end
   end
 
