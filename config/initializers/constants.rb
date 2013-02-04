@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 UNIT_FOR = {
   # macronutrients
   energy: "kcal",
