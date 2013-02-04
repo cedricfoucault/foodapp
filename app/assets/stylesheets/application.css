@@ -96,11 +96,34 @@ h1 {
     display: none;
 }
 
-.detail {
+.detail, .summaryDetail {
+    overflow-y: scroll;
     background-color: #fff;
+    padding: 1em;
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
+}
+
+.indent {
+    padding-left: 2em;
+}
+
+.table-fl+.table-fl {
+    border-left: 1px solid #ddd;
+    color: #666;
+    font-size: .8em;
+    margin-left: 1em;
+    padding-left: 1em;
+}
+.table-fl {
+    border-left: 0px solid #000;
+    float: left;
+    margin-right: 0em;
+}
+
+tbody>:nth-child(odd) {
+    background-color: #eee;
 }
