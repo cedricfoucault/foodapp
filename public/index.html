@@ -80,7 +80,7 @@
           {{food.carbs}},
           {{food.fat}}
         </span> -->
-        {{food.quantity}}g
+        {{amount(food)}}
         <span ng-click="showDetail(food)">{{food.long_description}}</span>
         <button ng-click="removeFood(food)">&times;</button>
       </li>
@@ -188,7 +188,7 @@
           </tr>
           <tr>
             <td><strong>Cholesterol</strong></td>
-            <td>{{currentFood.cholesterol}} g</td>
+            <td>{{currentFood.cholesterol}} mg</td>
           </tr>
           <tr>
             <td><strong>Omega 3</strong></td>
@@ -412,7 +412,7 @@
           </tr>
           <tr>
             <td><strong>Cholesterol</strong></td>
-            <td>{{cholesterol()}} g</td>
+            <td>{{cholesterol()}} mg</td>
           </tr>
           <tr>
             <td><strong>Omega 3</strong></td>

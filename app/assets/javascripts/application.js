@@ -112,7 +112,11 @@ function FoodCtrl($scope) {
         return function () {
             var r = 0;
             for (var i = $scope.foods.length - 1; i >= 0; i--){
-                r = r + ($scope.foods[i][FLOAT_FIELDS[j]] * $scope.foods[i].quantity / 100.0);
+                if ($scope.foods[i].unit == "ml") {
+                    r = r + ($scope.foods[i][FLOAT_FIELDS[j]] * $scope.foods[i].quantity / 100.0) * $scope.foods[i].density;
+                } else {
+                    r = r + ($scope.foods[i][FLOAT_FIELDS[j]] * $scope.foods[i].quantity / 100.0);
+                };
             };
             return r;
         }
@@ -152,10 +156,10 @@ function FoodCtrl($scope) {
     };
 
     $scope.amount = function(food) {
-        if (food.liquid) {
+        if (food.unit == "ml") {
             return "" + food.quantity + "ml";
         } else {
-            return "" + (food.quantity * food.density) + "g";
+            return "" + food.quantity + "g";
         };
     };
 
@@ -210,11 +214,12 @@ function FoodCtrl($scope) {
     // validée.
     $scope.addFood = function() {
         $scope.currentFood.quantity = parseFloat($scope.quantity);
-        if ($scope.currentFood.density == 0) {
-            $scope.currentFood.liquid == false;
-        } else {
-            $scope.currentFood.liquid == true
-        };
+        $scope.currentFood.unit = $scope.unit;
+        // if ($scope.currentFood.density == 0) {
+        //     $scope.currentFood.liquid == false;
+        // } else {
+        //     $scope.currentFood.liquid == true
+        // };
         $scope.foods.push($scope.currentFood);
         $scope.showSearchBox();
         $scope.foodText = '';
