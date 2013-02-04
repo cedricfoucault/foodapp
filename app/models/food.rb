@@ -20,8 +20,8 @@ class Food < ActiveRecord::Base
   def self.search(name)
     pattern = name + "%" # entry must begin with the given string
     find(:all,
-      conditions: ['common_name LIKE ? OR scientific_name LIKE ?'\
-        ' OR long_description LIKE ? OR short_description LIKE ?',
+      conditions: ['LOWER(common_name) LIKE LOWER(?) OR LOWER(scientific_name) LIKE LOWER(?)'\
+        ' OR LOWER(long_description) LIKE LOWER(?) OR LOWER(short_description) LIKE LOWER(?)',
         pattern, pattern, pattern, pattern],
       order: "length(long_description)")
   end
