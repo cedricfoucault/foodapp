@@ -101,6 +101,7 @@ directive('onKeyup', function() {
 function FoodCtrl($scope) {
     // Liste des aliments ajoutés (et leurs valeurs nutritionelles)
     $scope.foods = [];
+    $scope.unit = "g";
     $scope.currentFood = {};
 
     ///////////////////////
@@ -150,6 +151,14 @@ function FoodCtrl($scope) {
         $(".summaryDetail").removeClass("hidden");
     };
 
+    $scope.amount = function(food) {
+        if (food.liquid) {
+            return "" + food.quantity + "ml";
+        } else {
+            return "" + (food.quantity * food.density) + "g";
+        };
+    };
+
     $scope.searchFood = function() {
         if ($scope.foodText.length <= 2) {
             $('.completion').addClass("hidden");
@@ -168,9 +177,19 @@ function FoodCtrl($scope) {
                     };
                     for (var j = FLOAT_FIELDS.length - 1; j >= 0; j--) {
                         newFood[FLOAT_FIELDS[j]] = parseFloat($(results[i]).find(FLOAT_FIELDS[j]).text());
+                        if (isNaN(newFood[FLOAT_FIELDS[j]])) {
+                            newFood[FLOAT_FIELDS[j]] = 0;
+                        };
                     };
                     // console.log(newFood);
                     $scope.results.push(newFood);
+
+                    $scope.unit = "g";
+                    if (newFood.density == 0) {
+                        $("#ml").addClass("hidden");
+                    } else {
+                        $("#ml").removeClass("hidden");
+                    };
 
                     // $scope.results.push({
                     //     text:     $(results[i]).find("long_description").text(),
@@ -191,6 +210,11 @@ function FoodCtrl($scope) {
     // validée.
     $scope.addFood = function() {
         $scope.currentFood.quantity = parseFloat($scope.quantity);
+        if ($scope.currentFood.density == 0) {
+            $scope.currentFood.liquid == false;
+        } else {
+            $scope.currentFood.liquid == true
+        };
         $scope.foods.push($scope.currentFood);
         $scope.showSearchBox();
         $scope.foodText = '';

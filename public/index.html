@@ -99,12 +99,9 @@
         <tr>
           <td>{{currentFood.long_description}}</td>
           <td>
-            <!-- <select name="some_name" id="some_name" onchange="" size="1">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              
-            </select> -->
-            <input id="quantity" type="text" ng-model="quantity" size="3">g
+            <input id="quantity" type="text" ng-model="quantity" size="3">
+            <input type="radio" ng-model="unit" value="g">g
+            <span id="ml"><input type="radio" ng-model="unit" value="ml">ml</span>
           </td>
 
           <td><button ng-click="addFood()">Add</button></td>
