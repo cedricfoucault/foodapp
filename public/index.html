@@ -1,21 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ruby on Rails: Welcome aboard</title>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>NutriMate</title>
+
 
   <link rel="stylesheet" href="/assets/application.css">
   <script src="/assets/application.js"></script>
   <script src="/js/highcharts.js" type="text/javascript"></script>
 
   <script type="text/javascript" charset="utf-8">
-  window.overview = {};
-
-  function chartData () {
-    // window.overview.series[0].data[0].update(4);
-    // window.overview.series[0].data[1].update(4);
-    // window.overview.series[0].data[2].update(4);
-  }
-
   $(function () {
     window.overview = new Highcharts.Chart({
       chart: {
@@ -26,13 +20,13 @@
         // }
       },
       title: {
-        text: 'FoodApp'
+        text: 'Calorie Breakdown'
       },
       // xAxis: {
       //   categories: ['Proteins', 'Carbs', 'Fat']
       // },
       series: [{
-        name: 'Random data',
+        name: 'kcal',
         data: [
           ["Proteins", 0],
           ["Carbs", 0],
@@ -40,7 +34,24 @@
         ]
       }]
     });
-    // chartData();
+
+    window.detailChart = new Highcharts.Chart({
+      chart: {
+        renderTo: 'detailPie',
+        type: 'pie'
+      },
+      title: {
+        text: 'Calorie Breakdown for 100g'
+      },
+      series: [{
+        name: 'kcal',
+        data: [
+          ["Proteins", 0],
+          ["Carbs", 0],
+          ["Fat", 0]
+        ]
+      }]
+    });
   });
   </script>
 </head>
@@ -50,7 +61,7 @@
     <!-- résultats de recherche, pas toujours affichés -->
     <div class="completion hidden">
       <div ng-repeat="result in results">
-        <span ng-click="selectFood(result)">{{result.text}}</span>
+        <span ng-click="selectFood(result)">{{result.long_description}}</span>
       </div>
     </div>
 
@@ -58,22 +69,7 @@
     <div class="FoodSummary">
       <div id="pie" style="width: 300px; height: 200px"></div>
 
-      <!-- <table cellspacing="0" cellpadding="5">
-        <tr>
-          <th>Proteins</th>
-          <td>{{proteins()}}</td>
-        </tr>
-
-        <tr>
-          <th>Carbs</th>
-          <td>{{carbs()}}</td>
-        </tr>
-
-        <tr>
-          <th>Lipids</th>
-          <td>{{fat()}}</td>
-        </tr>
-      </table> -->
+      <button ng-click="showSummaryDetail()">View More</button>
     </div>
 
     <!-- liste d'aliments -->
@@ -84,8 +80,8 @@
           {{food.carbs}},
           {{food.fat}}
         </span> -->
-        {{food.quantity}}g
-        <span ng-click="showDetail()">{{food.text}}</span>
+        {{amount(food)}}
+        <span ng-click="showDetail(food)">{{food.long_description}}</span>
         <button ng-click="removeFood(food)">&times;</button>
       </li>
     </ul>
@@ -101,39 +97,469 @@
 
       <table border="0" cellspacing="0" cellpadding="0" id="confirmBox" class="hidden">
         <tr>
-          <td>{{currentFood.text}}</td>
+          <td>{{currentFood.long_description}}</td>
           <td>
-            <!-- <select name="some_name" id="some_name" onchange="" size="1">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              
-            </select> -->
-            <input type="text" ng-model="quantity" size="3">g
+            <input id="quantity" type="text" ng-model="quantity" size="3">
+            <input type="radio" ng-model="unit" value="g">g
+            <span id="ml"><input type="radio" ng-model="unit" value="ml">ml</span>
           </td>
 
           <td><button ng-click="addFood()">Add</button></td>
-          <td><button ng-click="cancel()">&times;</button></td>
+          <td><button ng-click="showSearchBox()">&times;</button></td>
         </tr>
       </table>
     </form>
 
     <div class="detail hidden">
-      <span ng-click="hideDetail()">CLOSE</span>
-      <h1>{{currentFood.text}}</h1>
-      <table border="1" cellspacing="0" cellpadding="0">
-        <tr>
-          <td>Proteins</td>
-          <td>{{currentFood.proteins}}</td>
-        </tr>
-        <tr>
-          <td>Carbs</td>
-          <td>{{currentFood.carbs}}</td>
-        </tr>
-        <tr>
-          <td>Fat</td>
-          <td>{{currentFood.fat}}</td>
-        </tr>
-      </table>
+      <button ng-click="hideDetail()">&larr; Back</button>
+      <div>{{currentFood.category}}</div>
+      <h1>{{currentFood.long_description}}</h1>
+      <div>{{currentFood.manufacturer_name}}</div>
+
+      <!-- <div>{{currentFood.common_name}}</div> -->
+      <!-- <div>{{currentFood.scientific_name}}</div> -->
+      <!-- <div>{{currentFood.short_description}}</div> -->
+      <!-- <div>{{currentFood.refuse_description}}</div> -->
+      <!-- <div>{{currentFood.refuse_percentage}}</div> -->
+      <div>Source: {{currentFood.source}}</div>
+
+      <div id="detailPie" style="width: 300px; height: 200px"></div>
+
+      <div class="table-fl">
+        <h2>Macronutrients</h2>
+        <table border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td>Energy</td>
+            <td>{{currentFood.energy}} kcal</td>
+          </tr>
+          <tr>
+            <td>Water</td>
+            <td>{{currentFood.water}} g</td>
+          </tr>
+          <tr>
+            <td>Proteins</td>
+            <td>{{currentFood.protein}} g</td>
+          </tr>
+          <tr>
+            <td>Carbohydrates</td>
+            <td>{{currentFood.carbohydrate}} g</td>
+          </tr>
+          <tr>
+            <td class="indent">Sugar</td>
+            <td>{{currentFood.sugar}} g</td>
+          </tr>
+          <tr>
+            <td class="indent">Fibers</td>
+            <td>{{currentFood.fibers}} g</td>
+          </tr>
+          <tr>
+            <td>Fat</td>
+            <td>{{currentFood.fat}} g</td>
+          </tr>
+          <tr>
+            <td>Alcohol</td>
+            <td>{{currentFood.alcohol}} g</td>
+          </tr>
+          <tr>
+            <td>Caffeine</td>
+            <td>{{currentFood.caffeine}} g</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="table-fl">
+        <h2>Fatty acids, fat micronutrients</h2>
+        <table border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td><strong>Saturated Fat</strong></td>
+            <td>{{currentFood.saturated_fat}} g</td>
+          </tr>
+          <tr>
+            <td><strong>Monounsaturated Fat</strong></td>
+            <td>{{currentFood.monounsaturated_fat}} g</td>
+          </tr>
+          <tr>
+            <td><strong>Polyunsaturated Fat</strong></td>
+            <td>{{currentFood.polyunsaturated_fat}} g</td>
+          </tr>
+          <tr>
+            <td><strong>Trans Fat</strong></td>
+            <td>{{currentFood.trans_fat}} g</td>
+          </tr>
+          <tr>
+            <td><strong>Cholesterol</strong></td>
+            <td>{{currentFood.cholesterol}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Omega 3</strong></td>
+            <td>{{currentFood.omega_3}} mg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>EPA</strong></td>
+            <td>{{currentFood.epa}} mg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>DPA</strong></td>
+            <td>{{currentFood.dpa}} mg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>DHA</strong></td>
+            <td>{{currentFood.dha}} mg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>ALA</strong></td>
+            <td>{{currentFood.ala}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Omega 6</strong></td>
+            <td>{{currentFood.omega_6}} mg</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="table-fl">
+        <h2>Minerals</h2>
+        <table border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td><strong>Calcium</strong></td>
+            <td>{{currentFood.calcium}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Iron</strong></td>
+            <td>{{currentFood.iron}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Magnesium</strong></td>
+            <td>{{currentFood.magnesium}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Phosphorus</strong></td>
+            <td>{{currentFood.phosphorus}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Potassium</strong></td>
+            <td>{{currentFood.potassium}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Sodium</strong></td>
+            <td>{{currentFood.sodium}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Zinc</strong></td>
+            <td>{{currentFood.zinc}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Copper</strong></td>
+            <td>{{currentFood.copper}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Manganese</strong></td>
+            <td>{{currentFood.manganese}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Selenium</strong></td>
+            <td>{{currentFood.selenium}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Fluoride</strong></td>
+            <td>{{currentFood.fluoride}} mg</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="table-fl">
+        <h2>Vitamins</h2>
+        <table border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td><strong>A</strong></td>
+            <td>{{currentFood.vit_a}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>B1</strong></td>
+            <td>{{currentFood.vit_b1}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B2</strong></td>
+            <td>{{currentFood.vit_b2}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B3</strong></td>
+            <td>{{currentFood.vit_b3}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B5</strong></td>
+            <td>{{currentFood.vit_b5}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B6</strong></td>
+            <td>{{currentFood.vit_b6}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B7</strong></td>
+            <td>{{currentFood.vit_b7}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>B9</strong></td>
+            <td>{{currentFood.vit_b9}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>B12</strong></td>
+            <td>{{currentFood.vit_b12}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>C</strong></td>
+            <td>{{currentFood.vit_c}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>D</strong></td>
+            <td>{{currentFood.vit_d}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>E</strong></td>
+            <td>{{currentFood.vit_e}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>K</strong></td>
+            <td>{{currentFood.vit_k}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>Carotene</strong></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>alpha</strong></td>
+            <td>{{currentFood.alpha_carotene}} µg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>beta</strong></td>
+            <td>{{currentFood.beta_carotene}} µg</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+
+
+
+
+
+    <div class="summaryDetail hidden">
+      <button ng-click="hideDetail()">&larr; Back</button>
+
+      <div id="summaryPie"></div>
+      <br>
+      <div class="table-fl">
+        <h2>Macronutrients</h2>
+        <table border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td>Energy</td>
+            <td>{{energy()}} kcal</td>
+          </tr>
+          <tr>
+            <td>Water</td>
+            <td>{{water()}} g</td>
+          </tr>
+          <tr>
+            <td>Proteins</td>
+            <td>{{protein()}} g</td>
+          </tr>
+          <tr>
+            <td>Carbohydrates</td>
+            <td>{{carbohydrate()}} g</td>
+          </tr>
+          <tr>
+            <td class="indent">Sugar</td>
+            <td>{{sugar()}} g</td>
+          </tr>
+          <tr>
+            <td class="indent">Fibers</td>
+            <td>{{fibers()}} g</td>
+          </tr>
+          <tr>
+            <td>Fat</td>
+            <td>{{fat()}} g</td>
+          </tr>
+          <tr>
+            <td>Alcohol</td>
+            <td>{{alcohol()}} g</td>
+          </tr>
+          <tr>
+            <td>Caffeine</td>
+            <td>{{caffeine()}} g</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="table-fl">
+        <h2>Fatty acids, fat micronutrients</h2>
+        <table border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td><strong>Saturated Fat</strong></td>
+            <td>{{saturated_fat()}} g</td>
+          </tr>
+          <tr>
+            <td><strong>Monounsaturated Fat</strong></td>
+            <td>{{monounsaturated_fat()}} g</td>
+          </tr>
+          <tr>
+            <td><strong>Polyunsaturated Fat</strong></td>
+            <td>{{polyunsaturated_fat()}} g</td>
+          </tr>
+          <tr>
+            <td><strong>Trans Fat</strong></td>
+            <td>{{trans_fat()}} g</td>
+          </tr>
+          <tr>
+            <td><strong>Cholesterol</strong></td>
+            <td>{{cholesterol()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Omega 3</strong></td>
+            <td>{{omega_3()}} mg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>EPA</strong></td>
+            <td>{{epa()}} mg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>DPA</strong></td>
+            <td>{{dpa()}} mg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>DHA</strong></td>
+            <td>{{dha()}} mg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>ALA</strong></td>
+            <td>{{ala()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Omega 6</strong></td>
+            <td>{{omega_6()}} mg</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="table-fl">
+        <h2>Minerals</h2>
+        <table border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td><strong>Calcium</strong></td>
+            <td>{{calcium()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Iron</strong></td>
+            <td>{{iron()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Magnesium</strong></td>
+            <td>{{magnesium()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Phosphorus</strong></td>
+            <td>{{phosphorus()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Potassium</strong></td>
+            <td>{{potassium()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Sodium</strong></td>
+            <td>{{sodium()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Zinc</strong></td>
+            <td>{{zinc()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Copper</strong></td>
+            <td>{{copper()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Manganese</strong></td>
+            <td>{{manganese()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Selenium</strong></td>
+            <td>{{selenium()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>Fluoride</strong></td>
+            <td>{{fluoride()}} mg</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="table-fl">
+        <h2>Vitamins</h2>
+        <table border="0" cellspacing="0" cellpadding="5">
+          <tr>
+            <td><strong>A</strong></td>
+            <td>{{vit_a()}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>B1</strong></td>
+            <td>{{vit_b1()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B2</strong></td>
+            <td>{{vit_b2()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B3</strong></td>
+            <td>{{vit_b3()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B5</strong></td>
+            <td>{{vit_b5()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B6</strong></td>
+            <td>{{vit_b6()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>B7</strong></td>
+            <td>{{vit_b7()}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>B9</strong></td>
+            <td>{{vit_b9()}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>B12</strong></td>
+            <td>{{vit_b12()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>C</strong></td>
+            <td>{{vit_c()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>D</strong></td>
+            <td>{{vit_d()}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>E</strong></td>
+            <td>{{vit_e()}} mg</td>
+          </tr>
+          <tr>
+            <td><strong>K</strong></td>
+            <td>{{vit_k()}} µg</td>
+          </tr>
+          <tr>
+            <td><strong>Carotene</strong></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>alpha</strong></td>
+            <td>{{alpha_carotene()}} µg</td>
+          </tr>
+          <tr>
+            <td class="indent"><strong>beta</strong></td>
+            <td>{{beta_carotene()}} µg</td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
 </body>
