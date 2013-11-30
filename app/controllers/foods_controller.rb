@@ -20,13 +20,21 @@ class FoodsController < ApplicationController
   #     end
   #   end
   def index
-      # retrieve the search results
-      @foods = params[:name] ? Food.search(params[:name]) : Food.find(:all, limit: 50)
-      
-      respond_to do |format|
-        format.xml { @foods }
-        format.html
-      end
+    #debug
+    # logger.info Food.where("id = 1").select(:textsearchable_col).first.textsearchable_col
+    # sqlquery = %q!SELECT textsearchable_col::text FROM "foods" WHERE (id = 1) LIMIT 1!
+    # logger.info ActiveRecord::Base.connection().execute(sqlquery).first
+    # sqlquery = %q!SELECT substring(textsearchable_col::text from '(''salt'':)\d+(,\d+)*') FROM "foods" WHERE (id = 1) LIMIT 1!
+    # logger.info ActiveRecord::Base.connection().execute(sqlquery).first
+    # retrieve the search results
+    @foods = params[:name] ? Food.search(params[:name]) : Food.find(:all, limit: 50)
+    # logger.info @foods[0].textsearchable_col
+    
+    respond_to do |format|
+      format.xml { @foods }
+      format.html
+    end
+    
   end
 
   # POST /foods

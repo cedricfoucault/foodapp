@@ -6,7 +6,15 @@ gem 'rails', '3.2.11'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 # gem 'sqlite3'
-gem 'pg'
+# gem 'pg'
+group :development do
+  # gem 'sqlite3'
+  gem 'pg'
+end
+group :production do
+  gem 'pg'
+end
+
 
 
 # Gems used only for assets and not required
@@ -40,3 +48,9 @@ gem 'jquery-rails'
 
 # To use XML
 gem 'nokogiri'
+
+# To use Postgres full text search
+gem 'pg_search'
+# gem 'textacular', "~> 3.0", require: 'textacular/rails'
+gem 'arel'
+

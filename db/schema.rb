@@ -1,4 +1,4 @@
-# -*- encoding : utf-8 -*-
+# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130130154717) do
+ActiveRecord::Schema.define(:version => 20130624064343) do
 
   create_table "foods", :force => true do |t|
     t.string   "common_name"
@@ -72,6 +72,9 @@ ActiveRecord::Schema.define(:version => 20130130154717) do
     t.string   "source"
     t.datetime "created_at",          :null => false
     t.datetime "updated_at",          :null => false
+    t.tsvector "textsearchable_col"
   end
+
+  add_index "foods", ["textsearchable_col"], :name => "textsearch_idx"
 
 end
