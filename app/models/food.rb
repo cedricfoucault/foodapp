@@ -1,5 +1,9 @@
 # -*- encoding : utf-8 -*-
+# require 'textacular/searchable'
+
 class Food < ActiveRecord::Base
+  include PgSearch
+  
   attr_accessible *FOOD_FIELDS
   
   # there must be at least one name or description for the entry
@@ -9,6 +13,15 @@ class Food < ActiveRecord::Base
   # validates :short_description, allow_nil: true, allow_blank: true, uniqueness: true
   # validates :common_name, allow_nil: true, allow_blank: true, uniqueness: true
   # validates :scientific_name, allow_nil: true, allow_blank: true, uniqueness: true
+  pg_search_scope :search_fulltext,
+                  :against => SEARCHABLE_FOOD_FIELDS,
+                  :using => {
+                    :tsearch => {
+                      :prefix => true,
+                      :dictionary => "english",
+                      tsvector_column: 'textsearchable_col'
+                    }
+                  }
   
   def at_least_one_name
     if [self.common_name, self.manufacturer_name, self.scientific_name,
@@ -17,13 +30,31 @@ class Food < ActiveRecord::Base
     end
   end
   
-  def self.search(name)
-    pattern = name + "%" # entry must begin with the given string
-    find(:all,
-      conditions: ['LOWER(common_name) LIKE LOWER(?) OR LOWER(scientific_name) LIKE LOWER(?)'\
-        ' OR LOWER(long_description) LIKE LOWER(?) OR LOWER(short_description) LIKE LOWER(?)',
-        pattern, pattern, pattern, pattern],
-      order: "length(long_description)")
+  # def self.search(name)
+  #   pattern = name + "%" # entry must begin with the given string
+  #   find(:all,
+  #     conditions: ['LOWER(common_name) LIKE LOWER(?) OR LOWER(scientific_name) LIKE LOWER(?)'\
+  #       ' OR LOWER(long_description) LIKE LOWER(?) OR LOWER(short_description) LIKE LOWER(?)',
+  #       pattern, pattern, pattern, pattern],
+  #     order: "length(long_description)")
+  # end
+  
+  def self.search(text)
+    # self.fuzzy_search(query)
+    # results = self.search_fulltext(query).limit(20)
+    # results.each {|r| puts r.pg_search_rank}
+    # results
+    # self.search_fulltext(query).limit(20).explain
+    # self.search_fulltext(text).limit(16)
+    n_results_limit = 16
+    
+    query_terms = self.query_terms_for_text(text)
+    results = self.search_fulltext(text)
+    logger.info query_terms
+    
+    rank = Hash.new { |rank, r|  rank[r] = self.rank_result(r, query_terms)}
+    results.sort! {|r1, r2| rank[r1] <=> rank[r2]}
+    results[0..(n_results_limit - 1)]
   end
   
 
@@ -69,6 +100,54 @@ class Food < ActiveRecord::Base
     rescue Nokogiri::XML::SyntaxError => e
       raise ArgumentError.new("Improper XML syntax: #{e}")
     end
+  end
+  
+  DISALLOWED_TSQUERY_CHARACTERS = /['?\\:]/
+  
+  def self.rank_result(result, query_terms)
+    # rank = [pos of first match for term 1, ..., pos of first match for term N, pg_search_rank]
+    rank = query_terms.map do |term|
+      min_pos = Float::INFINITY
+      pos_regexp = Regexp.new("'#{term}\\w*':(\\d+)")
+      # retrieve the min position of all matches if any
+      result.textsearchable_col.scan(pos_regexp) do |match|
+        if match[0].to_i < min_pos
+          min_pos = match[0].to_i
+        end
+      end
+      min_pos
+    end
+    rank << result.pg_search_rank
+  end
+  
+  def self.query_terms_for_text(text)
+    # retrieve the tsquery for the input text
+    tsquery = self.tsquery_for_text(text)
+    # parse the query to retrieve the individual terms
+    terms = tsquery.split('&')
+    terms.map! do |term|
+      /'(\w*)':\*/.match(term.strip)[1]
+    end
+  end
+  
+  def self.tsquery_for_text(text)
+    sanitized_term = text.gsub(DISALLOWED_TSQUERY_CHARACTERS, " ")
+
+    term_sql = Arel.sql(connection.quote(sanitized_term))
+
+    # After this, the SQL expression evaluates to a string containing the term surrounded by single-quotes.
+    # If :prefix is true, then the term will also have :* appended to the end.
+    terms = ["' ", term_sql, " '", ':*'].compact
+
+    sql_query_term = terms.inject do |memo, term|
+      Arel::Nodes::InfixOperation.new("||", memo, term)
+    end
+    sql_call_term = Arel::Nodes::NamedFunction.new(
+      "to_tsquery",
+      [:english, sql_query_term]
+    ).to_sql
+    sqlquery = "SELECT #{sql_call_term} AS query"
+    ActiveRecord::Base.connection().execute(sqlquery).first['query']
   end
   
   def self.is_numeric? field
@@ -123,6 +202,7 @@ class Food < ActiveRecord::Base
       "kJ" => 0.2388458966275
     }[unit]
   end
-
+  
+  # extend Searchable(*SEARCHABLE_FOOD_FIELDS)
 end
 

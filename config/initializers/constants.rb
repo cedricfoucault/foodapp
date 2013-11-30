@@ -116,3 +116,10 @@ FOOD_FIELDS = [
   
   :source,
 ]
+
+SEARCHABLE_FOOD_FIELDS = [
+  :common_name,
+  :short_description,
+  :long_description,
+  :scientific_name
+]
