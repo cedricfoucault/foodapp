@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>Nutrition Planner</title>
+  
+  <link rel="stylesheet" href="/assets/nutplan.css">
+  <script src="/assets/nutplan.js"></script>
+</head>
+
+<body>
+  <script type="text/template" id="goalTemplate">
+  <div class="row">
+    <div class="col-xs-2">
+      <div class="dropdown">
+      <% if (goal.has('nutrient')) {%>
+        <a data-toggle="dropdown" class="dropdown-toggle"><%- document.NUTRIENTS[goal.get('nutrient')].name.capitalize() %> <b class="caret"></b></a>
+      <% } else { %>
+        <a data-toggle="dropdown" class="dropdown-toggle">Select Nutrient <b class="caret"></b></a>
+      <% }%>
+        <ul class="dropdown-menu" role="menu">
+        <% _.each(document.NUTRIENTS_DROPDOWN, function(item) { %>
+          <% if (typeof item == "string") { %>
+            <li><a tabindex="-1" class="goalNutrient" id="<%= item %>"><%- document.NUTRIENTS[item].name.capitalize() %></a></li>
+          <% } else { %>
+            <li class="dropdown-submenu">
+              <a tabindex="-1"><%- item.category.capitalize() %></a>
+                <ul class="dropdown-menu">
+                <% _.each(item.nutrients, function(nutrient) { %>
+                    <li><a tabindex="-1" class="goalNutrient" id="<%= nutrient %>"><%- document.NUTRIENTS[nutrient].name.capitalize() %></a></li>
+                <% }); %>
+                </ul>
+            </li>
+          <% } %>
+        <% }); %>
+        </ul>
+      </div>
+    </div>
+    <div class="col-xs-2">
+      <div class="form-group">
+      <% if (goal.has('nutrient')) { %>
+        <div class="input-group">
+          <input type="text" class="form-control goalValue" size="6" min="1" placeholder="enter amount" value="<%- goal.get('value') %>"/>
+          <span class="input-group-addon"><%- document.NUTRIENTS[goal.get('nutrient')].unit %></span>
+        </div>
+      <% } else { %>
+        <input type="text" class="form-control goalValue" size="6" min="1" placeholder="enter amount" value="<%- goal.get('value') %>"/>
+      <% } %>
+      </div>
+    </div>
+    <div class="col-xs-8">
+      <button class="close deleteGoal">&times;</button>
+    </div>
+  </div>
+  </script>
+  
+  <script type="text/template" id="menuTemplate">
+  <div style="border: 1px solid #888; padding: 1em;">
+    <div class="row">
+      <div class="col-xs-8">
+        <input type="text" class="form-control input-lg nameMenu" min="1" placeholder="enter menu name" value="<%- menu.get('name') %>"/>
+      </div>
+      <div class="col-xs-3">
+        <div class="input-group">
+        <input type="number" class="form-control input-lg amountMenu" name="servings" min="1" value="<%- menu.get('amount') %>"/>
+        <span class="input-group-addon">servings</span>
+        </div>
+      </div>
+      <div class="col-xs-1">
+        <button class="close deleteMenu">&times;</button>
+      </div>
+    </div>
+    <hr /> 
+    <div id="search">
+    </div>
+    <div class="row">
+        <div class="col-xs-8">
+          <h4>Food</h4>
+        </div>
+        <div class="col-xs-3">
+          <h4>Quantity</h4>
+        </div>
+        <div class="col-xs-1"></div>
+    </div>
+    <div class="menuItems"></div>
+    <hr />
+  </div>
+  </script>
+  
+  <script type="text/template" id="searchTemplate">
+  <div class="row">
+    <form role="form">
+        <div class="col-xs-12">
+          <div id="searchBox">
+            <label for="searchInput">Add Food</label>
+            <input type="search" size="32" class="form-control" name="searchBox" id="searchInput" autocomplete="off" placeholder="search food" />
+          </div>
+        </div>
+    </form>
+  </div>
+  <div class="row"><div class="col-xs-12"><div id="searchResults" class="hidden"></div></div></div>
+  </script>
+  
+  <script type="text/template" id="searchResultsTemplate">
+  <div class="list-group">
+    <% results.each(function(result) { %>
+      <a class="list-group-item searchResult" id="<%= result.cid %>"><%- result.get('long_description') %></a>
+    <% }); %>
+  </div>
+  </script>
+  
+  <script type="text/template" id="menuItemsTemplate">
+    <% menuItems.each(function(menuItem) { %>
+      <div class="row alter">
+        <div class="menuItem" id="<%= result.cid %>">
+          <div class="col-xs-8"><%- menuItem.get('food').get('long_description') %></div>
+          <div class="col-xs-3 form-group">
+            <div class="input-group">
+              <input type="text" class="form-control amount" size="6" name="quantity" min="1" placeholder="enter amount"/>
+              <span class="input-group-addon">
+                <label class="radio-inline">
+                  <input type="radio" name="unitRadios1" id="g" value="g" checked /> g
+                </label>
+              </span>
+            </div>
+          </div>
+          <div class="col-xs-1"><button class="close deleteItem">&times;</button></div>
+        </div>
+      </div>
+    <% }); %>
+  </script>
+  
+  <script type="text/template" id="menuItemTemplate">
+    <div class="row">
+      <form>
+        <div class="col-xs-8"><%- menuItem.get('food').get('long_description') %></div>
+        <div class="col-xs-3 form-group">
+          <div class="input-group">
+            <input type="text" class="form-control amount" size="6" name="quantity" min="1" placeholder="enter amount" value="<%- menuItem.get('amount') %>"/>
+            <span class="input-group-addon">
+              <label class="radio-inline">
+                <input type="radio" name="unitRadios1" id="g" value="g" checked /> g
+              </label>
+            </span>
+          </div>
+        </div>
+        <div class="col-xs-1"><button class="close deleteItem">&times;</button></div>
+      </form>
+    </div>
+  </script>
+  <nav class="navbar navbar-default navbar-fixed-top" style="background-color: #ffffff" role="navigation" id="navbar">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="row">
+            <div class= "col-xs-4 verticalalign-bottom">
+              <h2>Compare</h2>
+            </div>
+            <div class= "col-xs-8 verticalalign-bottom">
+              <div class="pull-right">
+                <button type="button" class="btn btn-default" id="zoomIn">
+                  <span class="glyphicon glyphicon-zoom-in"></span>
+                </button>
+                <button type="button" class="btn btn-default" id="zoomOut">
+                  <span class="glyphicon glyphicon-zoom-out"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <hr />
+        </div>
+        <!-- <div class="col-xs-12">
+          <h2>Compare</h2>
+          <hr />
+        </div> -->
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <canvas id="nutrisketch" data-processing-sources="/assets/pjs/ColourRule.pde /assets/pjs/ColourTable.pde /assets/pjs/AbstractChart.pde /assets/pjs/StackedBarChart.pde /assets/pjs/Goal.pde /assets/pjs/Menu.pde /assets/pjs/nutrichart.pde"></canvas>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="row">
+          <div class= "col-xs-4 verticalalign-bottom">
+            <h2>Diet Goals</h2>
+          </div>
+          <div class= "col-xs-8 verticalalign-bottom">
+            <div class="pull-right">
+              <button class="btn btn-primary" id="newGoal">Add Goal</button>
+            </div>
+          </div>
+        </div>
+        <hr />
+      </div>
+    </div>
+    <div class="goals"></div>
+    
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="row">
+          <div class= "col-xs-4 verticalalign-bottom">
+            <h2>Menus</h2>
+          </div>
+          <div class= "col-xs-8 verticalalign-bottom">
+            <div class="pull-right">
+              <button class="btn btn-primary" id="newMenu">Add Menu</button>
+            </div>
+          </div>
+        </div>
+        <hr />
+      </div>
+    </div>
+    <div class="menus"></div>
+    <div class="row">
+      <div class="col-xs-12">
+        <button class="btn btn-primary" id="saveModels">Save Models</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

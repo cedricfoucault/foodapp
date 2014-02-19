@@ -32,6 +32,7 @@ class FoodsController < ApplicationController
     
     respond_to do |format|
       format.xml { @foods }
+      format.json { render :json => @foods }
       format.html
     end
     
